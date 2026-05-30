@@ -42,9 +42,6 @@ export default function SignUpPage() {
             We sent a confirmation link to
           </p>
           <p className="text-sm font-semibold text-gray-900 mb-6">{email}</p>
-          <p className="text-xs text-gray-400">
-            Confirm karne ke baad automatically login ho jaayega.
-          </p>
         </div>
       </div>
     );
