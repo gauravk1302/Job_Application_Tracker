@@ -1,8 +1,6 @@
-import { string } from "better-auth";
-import mongoose, { Schema, Document, Mongoose } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IBoard extends Document {
-    // In this document we define the fields that we want to include in our document 
     name: string,
     userId: string,
     columns: mongoose.Types.ObjectId[],
@@ -10,7 +8,7 @@ export interface IBoard extends Document {
     updatedAt: Date,
 }
 
-const BaordSchema = new Schema<IBoard>({
+const BoardSchema = new Schema<IBoard>({
     name: {
         type: String,
         required: true,
@@ -28,8 +26,8 @@ const BaordSchema = new Schema<IBoard>({
     ],
 },
     {
-        timestamps: true,// It will automatically add the fields like createdAt and updatedAt in each of the above field
+        timestamps: true,
     }
 )
 
-export default mongoose.models.Board || mongoose.model<IBoard>("Board", BaordSchema);
+export default mongoose.models.Board || mongoose.model<IBoard>("Board", BoardSchema);
