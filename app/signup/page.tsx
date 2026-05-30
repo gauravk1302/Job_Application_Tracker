@@ -1,137 +1,124 @@
 "use client";
-
+import { createClient } from "@/lib/supabase/client";
+import { useState } from "react";
+import { Briefcase, Mail } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { signUp } from "@/lib/auth/auth-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 
-export default function SignUp() {
-  const [name, setName] = useState("");
+export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
-  const router = useRouter();
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    setError("");// It will refresh the prevoius error if there are they
+  async function handleSignUp() {
     setLoading(true);
-
-    try {
-      const result = await signUp.email({
-        name,
-        email,
-        password,
-      });
-
-      if (result.error) {
-        setError(result.error.message ?? "Failed to sign up");
-      } else {
-        router.push("/dashboard");
-      }
-    } catch (err) {
-      setError("An unexpected error occurred");
-    } finally {
+    setError("");
+    const supabase = createClient();
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      setError(error.message);
       setLoading(false);
+      return;
     }
+    setEmailSent(true);
+    setLoading(false);
+  }
+
+  if (emailSent) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-4">
+        <div className="w-full max-w-sm text-center">
+          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
+            <Mail className="h-6 w-6 text-primary" />
+          </div>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+            Check your email
+          </h1>
+          <p className="text-sm text-gray-500 mb-1">
+            We sent a confirmation link to
+          </p>
+          <p className="text-sm font-semibold text-gray-900 mb-6">{email}</p>
+          <p className="text-xs text-gray-400">
+            Confirm karne ke baad automatically login ho jaayega.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-white p-4">
-      <Card className="w-full max-w-md border-gray-200 shadow-lg">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-black">
-            Sign Up
-          </CardTitle>
-          <CardDescription className="text-gray-600">
-            Create an account to start tracking your job applications
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <CardContent className="space-y-4">
-            {error && (
-              <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-                {error}
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-gray-700">
-                Name
-              </Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="border-gray-300 focus:border-primary focus:ring-primary"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-700">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="border-gray-300 focus:border-primary focus:ring-primary"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-700">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                className="border-gray-300 focus:border-primary focus:ring-primary" placeholder="Enter your password"
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary/90"
-              disabled={loading}
-            >
-              {loading ? "Creating account..." : "Sign Up"}
-            </Button>
-            <p className="text-center text-sm text-gray-600">
-              Already have an account?{" "}
-              <Link
-                href="/signin"
-                className="font-medium text-primary hover:underline"
-              >
-                Sign in
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+        <Link href="/" className="flex items-center gap-2 mb-8">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Briefcase className="h-5 w-5 text-primary" />
+          </div>
+          <span className="text-lg font-medium text-primary">Job Tracker</span>
+        </Link>
+
+        <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+          Create account
+        </h1>
+        <p className="text-sm text-gray-500 mb-8">
+          Start tracking your applications
+        </p>
+
+        {error && (
+          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 mb-5">
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-4">
+          <div>
+            <Label className="text-xs font-medium text-gray-500 mb-1.5 block">
+              Email
+            </Label>
+            <Input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="h-11 border-gray-200 focus-visible:ring-primary"
+            />
+          </div>
+          <div>
+            <Label className="text-xs font-medium text-gray-500 mb-1.5 block">
+              Password
+            </Label>
+            <Input
+              type="password"
+              placeholder="Min. 8 characters"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSignUp()}
+              className="h-11 border-gray-200 focus-visible:ring-primary"
+            />
+          </div>
+        </div>
+
+        <Button
+          className="w-full h-11 mt-6 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg"
+          onClick={handleSignUp}
+          disabled={loading}
+        >
+          {loading ? "Creating account..." : "Create account"}
+        </Button>
+
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Already have an account?{" "}
+          <Link
+            href="/signin"
+            className="text-primary hover:underline font-medium"
+          >
+            Log in
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

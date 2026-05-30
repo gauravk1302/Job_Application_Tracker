@@ -1,22 +1,16 @@
-"use client"
+'use client'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 
-import { useRouter } from "next/navigation"
-import { DropdownMenuItem } from "./ui/dropdown-menu"
-import { signOut } from "@/lib/auth/auth-client"
+export default function SignOutBtn() {
+  const router = useRouter()
 
-export default function SignOutButton() {
-    const router = useRouter();
-    return (
-    <DropdownMenuItem onClick={async () => {await signOut();
-        const result = await signOut();
-        if (result.data){
-            router.push("/signin");
-        }else{
-            alert("Error signing out");
-        }
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/signin')
+    router.refresh()
+  }
 
-    }}>
-        Log Out
-    </DropdownMenuItem>
-    )
+  return <button onClick={handleSignOut}>Sign Out</button>
 }

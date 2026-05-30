@@ -1,11 +1,13 @@
 import KanbanBoard from "@/components/kanban-board";
-import { getSession } from "@/lib/auth/auth";
+import { createClient } from "@/lib/supabase/server";
 import connectDB from "@/lib/db";
 import { Board } from "@/lib/models";
+import { initializeUserBoard } from "@/lib/init-user-board";
+import { redirect } from "next/navigation";
 import React, { Suspense } from "react";
 
 async function getBoard(userId: string) {
-  "use cache";
+  
 
   await connectDB();
 
@@ -26,27 +28,28 @@ async function getBoard(userId: string) {
 }
 
 async function DashboardPage() {
-  const session = await getSession();
-  const userId = session?.user.id ?? "";
-  const board = await getBoard(userId);
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) redirect("/signin");
+
+  const userId = user.id;
+
+  let board = await getBoard(userId);
+  if (!board) {
+    await initializeUserBoard(userId);
+    board = await getBoard(userId);
+  }
 
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto p-6">
-        {/* SAME WRAPPER AS KANBAN */}
         <div className="flex justify-center">
           <div className="w-full max-w-7xl">
-            {/* Header starts EXACTLY where columns start */}
             <div className="mb-6">
-              <h1 className="text-3xl font-bold text-black">
-                Job Hunt
-              </h1>
-              <p className="text-gray-600">
-                Track your job applications
-              </p>
+              <h1 className="text-3xl font-bold text-black">Job Hunt</h1>
+              <p className="text-gray-600">Track your job applications</p>
             </div>
-
-            {/* Kanban */}
             <div className="overflow-x-auto">
               <KanbanBoard board={board} userId={userId} />
             </div>
